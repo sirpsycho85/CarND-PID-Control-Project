@@ -38,11 +38,18 @@ PID::~PID() {}
 
 void PID::Init(double Kp, double Ki, double Kd) {
 	_Kp = Kp;
-	_Ki = Kd;
-	_Ki = Kd;
+	_Ki = Ki;
+	_Kd = Kd;
+	_cte_prior = 0;
+	_d_error = 0;
+	_i_error = 0;
 }
 
 void PID::UpdateError(double cte) {
+	_p_error = cte;
+	_i_error += cte;
+	_d_error = (_cte_prior-cte);
+	_cte_prior = cte;
 }
 
 double PID::TotalError() {

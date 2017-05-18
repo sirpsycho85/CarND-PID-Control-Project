@@ -17,6 +17,8 @@ public:
   double _Ki;
   double _Kd;
 
+  double _cte_prior;
+
   /*
   * Constructor
   */
