@@ -1,4 +1,5 @@
 #include "PID.h"
+#include <iostream>
 
 using namespace std;
 
@@ -36,7 +37,9 @@ PID::PID() {}
 PID::~PID() {}
 
 void PID::Init(double Kp, double Ki, double Kd) {
-	// TODO: distinguish between Kp in this scope and the member variables
+	_Kp = Kp;
+	_Ki = Kd;
+	_Ki = Kd;
 }
 
 void PID::UpdateError(double cte) {
