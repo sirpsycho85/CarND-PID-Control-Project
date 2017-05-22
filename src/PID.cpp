@@ -32,26 +32,96 @@ General flow
 TODO: create a P-only controller first
 */
 
+// TODO: twiddle should be separate class
+
 PID::PID() {}
 
 PID::~PID() {}
 
 void PID::Init(double Kp, double Ki, double Kd) {
-	_Kp = Kp;
-	_Ki = Ki;
-	_Kd = Kd;
-	_cte_prior = 0;
-	_d_error = 0;
-	_i_error = 0;
+  _Kp = Kp;
+  _Ki = Ki;
+  _Kd = Kd;
+  _cte_prior = 0;
+  _d_error = 0;
+  _i_error = 0;
+
+  dK.push_back(1);
+  dK.push_back(1);
+  dK.push_back(1);
+
+  dK_index = 0;
+  is_twiddle_initialized = false;
+  best_error = 0;
+  time_step = 0;
+  max_time_steps = 100;
 }
 
 void PID::UpdateError(double cte) {
-	_p_error = cte;
-	_i_error += cte;
-	_d_error = (_cte_prior-cte);
-	_cte_prior = cte;
+  _p_error = cte;
+  _i_error += cte;
+  _d_error = (_cte_prior-cte);
+  _cte_prior = cte;
 }
 
 double PID::TotalError() {
 }
 
+/*
+Twiddle under 2 conditions:
+- cte is too high
+- _i_error goes above best _i_error for first N steps
+
+check _i_error after N steps
+initialize to best error and restart
+
+add dKp to Kp
+get new _i_error
+if best:
+  multiply dKp by 1.1
+else:
+  subtract 2*dKp from Kp
+  if best:
+    multiply dKp by 1.1
+  else:
+    multiple dKp by 0.9
+move on to dKi
+
+state:
+- values of deltas
+- pointer to the correct parameter to tweak
+- best error
+
+if time_step > T
+  twiddle
+
+twiddle()
+
+
+*/
+void PID::Twiddle(uWS::WebSocket<uWS::SERVER> ws) {
+  if (time_step == max_time_steps) {
+    
+    if (is_twiddle_initialized == false) {
+      best_error = _i_error;
+      is_twiddle_initialized = true;
+    }
+    else {
+      //the main twiddle algorithm goes here
+    }
+
+    time_step = 0;
+    Restart(ws); 
+  }
+  else {
+    time_step++;
+  }
+}
+
+void PID::Restart(uWS::WebSocket<uWS::SERVER> ws){
+  // _cte_prior = 0;
+  // _d_error = 0;
+  // _i_error = 0;
+  std::string reset_msg = "42[\"reset\",{}]";
+  ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT);
+}

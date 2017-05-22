@@ -1,5 +1,9 @@
 #ifndef PID_H
 #define PID_H
+#include <uWS/uWS.h>
+#include <vector>
+
+using namespace std;
 
 class PID {
 public:
@@ -17,7 +21,13 @@ public:
   double _Ki;
   double _Kd;
 
+  vector<double> dK;
+  int dK_index;
   double _cte_prior;
+  double best_error;
+  int time_step;
+  int max_time_steps;
+  bool is_twiddle_initialized;
 
   /*
   * Constructor
@@ -43,6 +53,10 @@ public:
   * Calculate the total PID error.
   */
   double TotalError();
+
+  void Twiddle(uWS::WebSocket<uWS::SERVER> ws);
+
+  void Restart(uWS::WebSocket<uWS::SERVER> ws);
 };
 
 #endif /* PID_H */
