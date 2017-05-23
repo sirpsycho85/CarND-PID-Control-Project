@@ -8,6 +8,9 @@
 using namespace std;
 using json = nlohmann::json;
 
+// config
+bool is_training = true;
+
 // For converting back and forth between radians and degrees.
 constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
@@ -62,23 +65,29 @@ int main()
           * another PID controller to control the speed!
           */
 
-          
-          pid.Twiddle(ws);
+          if(is_training){
+            if(!pid.twiddle_completed) {
+              pid.Twiddle(ws);
+            }
+            else {
+              return 0;
+            }
+          }
 
           pid.UpdateError(cte);
 
-          steer_value = -1 * pid._Kp * pid._p_error
-                        -1 * pid._Ki * pid._i_error
-                        -1 * pid._Kd * pid._d_error;
+          steer_value = -1 * pid.coefficients[0] * pid._p_error
+                        -1 * pid.coefficients[1] * pid._i_error
+                        -1 * pid.coefficients[2] * pid._d_error;
           
           // DEBUG
-          std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+          //std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = 0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {

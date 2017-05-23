@@ -14,20 +14,19 @@ public:
   double _i_error;
   double _d_error;
 
-  /*
-  * Coefficients
-  */ 
-  double _Kp;
-  double _Ki;
-  double _Kd;
-
-  vector<double> dK;
-  int dK_index;
+  enum twiddle_step {UP, DOWN, RESET};
+  vector<double> coefficients;
+  vector<double> twiddle_variables;
+  int twiddle_coefficient_index;
+  twiddle_step step;
   double _cte_prior;
   double best_error;
   int time_step;
   int max_time_steps;
   bool is_twiddle_initialized;
+  double twiddle_threshold;
+  bool twiddle_completed;
+
 
   /*
   * Constructor
@@ -57,6 +56,8 @@ public:
   void Twiddle(uWS::WebSocket<uWS::SERVER> ws);
 
   void Restart(uWS::WebSocket<uWS::SERVER> ws);
+
+  void twiddle_next_coefficient();
 };
 
 #endif /* PID_H */

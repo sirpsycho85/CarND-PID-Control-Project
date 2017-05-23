@@ -39,22 +39,26 @@ PID::PID() {}
 PID::~PID() {}
 
 void PID::Init(double Kp, double Ki, double Kd) {
-  _Kp = Kp;
-  _Ki = Ki;
-  _Kd = Kd;
   _cte_prior = 0;
   _d_error = 0;
   _i_error = 0;
 
-  dK.push_back(1);
-  dK.push_back(1);
-  dK.push_back(1);
+  coefficients.push_back(0);
+  coefficients.push_back(0);
+  coefficients.push_back(0);
 
-  dK_index = 0;
+  twiddle_variables.push_back(1);
+  twiddle_variables.push_back(1);
+  twiddle_variables.push_back(1);
+
+  twiddle_coefficient_index = 0;
   is_twiddle_initialized = false;
   best_error = 0;
   time_step = 0;
-  max_time_steps = 100;
+  max_time_steps = 200;
+  twiddle_threshold = 1;
+  twiddle_completed = false;
+  step = UP;
 }
 
 void PID::UpdateError(double cte) {
@@ -100,28 +104,85 @@ twiddle()
 
 */
 void PID::Twiddle(uWS::WebSocket<uWS::SERVER> ws) {
+  //after required time, compare error to best error
   if (time_step == max_time_steps) {
     
+    //if this is first run, initialize error
     if (is_twiddle_initialized == false) {
       best_error = _i_error;
       is_twiddle_initialized = true;
     }
-    else {
-      //the main twiddle algorithm goes here
+
+    //if best error, move on to next coefficient
+    if (_i_error < best_error) {
+      twiddle_variables[twiddle_coefficient_index] *= 1.1;
+      twiddle_next_coefficient();
     }
 
-    time_step = 0;
-    Restart(ws); 
+    // tweak up
+    if (step == UP) {
+      coefficients[twiddle_coefficient_index]
+        += twiddle_variables[twiddle_coefficient_index];
+      step = DOWN;
+    }
+
+    // tweak down
+    else if(step == DOWN) {
+      coefficients[twiddle_coefficient_index]
+        -= 2*twiddle_variables[twiddle_coefficient_index];
+      step = RESET;
+    }
+
+    // reset
+    else if (step == RESET) {
+      coefficients[twiddle_coefficient_index]
+        += twiddle_variables[twiddle_coefficient_index];
+
+      twiddle_variables[twiddle_coefficient_index] *= 0.9;
+      
+      twiddle_next_coefficient();
+    }
+
+    // print coefficients
+
+    cout << "coefficients" << endl;
+    for(int i = 0; i < coefficients.size(); ++i) {
+      cout << coefficients[i] << endl;
+    }
+    cout << "_i_error: " << _i_error << endl;
+
+    //stop twiddling if sum of variables fall below threshold
+    
+    double sum_twiddle_variables = 0;
+    for(int i = 0; i < twiddle_variables.size(); ++i) {
+      sum_twiddle_variables += twiddle_variables[i];
+    }
+
+    if(sum_twiddle_variables < twiddle_threshold) {
+      cout << "twiddle compelted" << endl;
+      exit(EXIT_FAILURE);
+    }
+
+    // restart simulator
+
+    Restart(ws);
   }
   else {
     time_step++;
   }
 }
 
+void PID::twiddle_next_coefficient() {
+  twiddle_coefficient_index =
+    (twiddle_coefficient_index + 1) % 2;
+  step = UP;
+}
+
 void PID::Restart(uWS::WebSocket<uWS::SERVER> ws){
-  // _cte_prior = 0;
-  // _d_error = 0;
-  // _i_error = 0;
+  _cte_prior = 0;
+  _d_error = 0;
+  _i_error = 0;
+  time_step = 0;
   std::string reset_msg = "42[\"reset\",{}]";
   ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT);
 }
