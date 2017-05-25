@@ -33,6 +33,7 @@ TODO: create a P-only controller first
 */
 
 // TODO: twiddle should be separate class
+// TODO: training wrapper around twiddle that restarts the simulator
 
 PID::PID() {}
 

@@ -22,6 +22,7 @@ public:
   double _cte_prior;
   double best_error;
   int time_step;
+  
   int max_time_steps;
   bool is_twiddle_initialized;
   double twiddle_threshold;
