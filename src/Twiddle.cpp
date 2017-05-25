@@ -10,10 +10,10 @@ Twiddle::Twiddle() {}
 Twiddle::~Twiddle() {}
 
 
-void Twiddle::Init(PID pid, double _initial_error) {
-  _pid = pid;
+void Twiddle::init(PID &pid, double _initial_error) {
+  _pid = &pid;
 
-  _size = _pid.coefficients.size();
+  _size = (*_pid).coefficients.size();
   
   for(int i=0;i<_size;++i) {
     _dK.push_back(1);

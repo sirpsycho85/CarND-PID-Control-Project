@@ -1,8 +1,9 @@
 #include <uWS/uWS.h>
 #include <iostream>
+#include <math.h>
 #include "json.hpp"
 #include "PID.h"
-#include <math.h>
+#include "Twiddle.h"
 
 // for convenience
 using namespace std;
@@ -39,6 +40,15 @@ int main()
   PID pid;
   // TODO: Initialize the pid variable.
   pid.Init(0,0,0);
+
+  cout<<"_cte_prior before twiddle"<<pid._cte_prior<<endl;
+
+  Twiddle twid;
+  twid.init(pid, 28);
+
+  cout<<"_cte_prior after twiddle"<<pid._cte_prior<<endl;
+
+  return 0;
 
   // TODO: modify speed based upon steering angle, e.g. targetSpeed = 30.*(1.-abs(steerAngle)) + 20
 

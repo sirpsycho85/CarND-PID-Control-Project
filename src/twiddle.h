@@ -14,12 +14,13 @@ public:
 
   Twiddle();
   virtual ~Twiddle();
-  void Init(PID pid, double _initial_error);
+  void init(PID &pid, double _initial_error);
 
 private:
   enum tweak_state {UP, DOWN, RESET};
 
-  PID _pid;
+  PID *_pid;
+  PID &pid2;
   int _size;
   vector<double> _dK;
   double _best_error;
