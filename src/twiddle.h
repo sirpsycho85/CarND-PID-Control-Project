@@ -10,24 +10,26 @@ using namespace std;
 class Twiddle {
 
 public:
-  bool _is_completed;
-
   Twiddle();
   virtual ~Twiddle();
-  void init(PID &pid, double _initial_error);
+
+  void init(PID &pid, vector<double> dK, double threshold, double initial_error);
+  void run(double new_error);
+  bool threshold_reached();
+  bool _is_init;
 
 private:
-  enum tweak_state {UP, DOWN, RESET};
+  enum tweak_state {UP, DOWN, RESTORE};
 
   PID *_pid;
-  PID &pid2;
   int _size;
   vector<double> _dK;
+  double _threshold;
   double _best_error;
-  double _new_error;
   int _index;
   tweak_state _tweak_state;
-  bool _is_init;
+
+  void next_index();
 };
 
 #endif

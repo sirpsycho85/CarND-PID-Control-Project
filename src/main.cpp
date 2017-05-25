@@ -44,7 +44,8 @@ int main()
   cout<<"_cte_prior before twiddle"<<pid._cte_prior<<endl;
 
   Twiddle twid;
-  twid.init(pid, 28);
+  vector<double> dK_initial = {1.0,1.0,1.0};
+  twid.init(pid, dK_initial, 0.1, 100);
 
   cout<<"_cte_prior after twiddle"<<pid._cte_prior<<endl;
 
