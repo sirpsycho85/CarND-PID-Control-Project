@@ -20,19 +20,23 @@ void Twiddle::init(PID &pid, vector<double> dK, double threshold, double initial
 
   _threshold = threshold;
 
-  _best_error = initial_error;
+  _best_error = fabs(initial_error);
 
   _index = 0;
 
   _tweak_state = UP;
 
   _is_init = true;
+
+  cout << "initial error = " << _best_error << endl;
 }
 
 
 void Twiddle::run(double new_error) {
 
   if(!threshold_reached()) {
+
+    new_error = fabs(new_error);
     
     if(new_error < _best_error) {
       _best_error = new_error;
@@ -40,8 +44,8 @@ void Twiddle::run(double new_error) {
       next_index();
     }
     else if(_tweak_state == RESTORE) {
-      _dK[_index] *= 0.9;
       (*_pid).coefficients[_index] += _dK[_index];
+      _dK[_index] *= 0.9;
       next_index();
     }
 
@@ -54,6 +58,8 @@ void Twiddle::run(double new_error) {
       _tweak_state = RESTORE;
     }
   }
+  cout << "new error = " << new_error << " , best error = " << _best_error << endl;
+  cout << "coefficients = " << (*_pid).coefficients[0] << "\t" << (*_pid).coefficients[1] << "\t" << (*_pid).coefficients[2] << endl;
 }
 
 

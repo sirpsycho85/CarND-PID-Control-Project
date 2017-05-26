@@ -2,6 +2,7 @@
 #define TRAINER_H
 
 #include <uWS/uWS.h>
+#include <iostream>
 #include "PID.h"
 #include "Twiddle.h"
 
@@ -22,8 +23,8 @@ public:
 	Trainer();
 	virtual ~Trainer();
 
-	void init(PID &pid, vector<double> dK, double threshold, int max_timesteps, uWS::WebSocket<uWS::SERVER> &ws);
-	void run();
+	void init(PID &pid, vector<double> dK, double threshold, int max_timesteps);
+	void run(uWS::WebSocket<uWS::SERVER> ws);
 
 private:
 	PID *_pid;
@@ -33,9 +34,8 @@ private:
 	double _threshold;
 	int _timestep;
 	bool _is_init;
-	uWS::WebSocket<uWS::SERVER> *_ws;
 
-	void restart();
+	void restart(uWS::WebSocket<uWS::SERVER> ws);
 };
 
 #endif

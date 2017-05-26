@@ -2,6 +2,7 @@
 #define TWIDDLE_H
 
 #include <vector>
+#include <cmath>
 #include "PID.h"
 
 using namespace std;

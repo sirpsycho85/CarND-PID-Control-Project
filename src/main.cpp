@@ -1,8 +1,10 @@
 #include <uWS/uWS.h>
 #include <iostream>
 #include <math.h>
+
 #include "json.hpp"
 #include "PID.h"
+#include "Trainer.h"
 #include "Twiddle.h"
 
 // for convenience
@@ -10,7 +12,7 @@ using namespace std;
 using json = nlohmann::json;
 
 // config
-bool is_training = true;
+  bool is_training = false;
 
 // For converting back and forth between radians and degrees.
 constexpr double pi() { return M_PI; }
@@ -38,22 +40,19 @@ int main()
   uWS::Hub h;
 
   PID pid;
-  // TODO: Initialize the pid variable.
-  pid.Init(0,0,0);
+  pid.Init(3.641,-0.00115523,3.27761);
+  //3.641 -0.00115523 3.27761 with 0.05 0.00005 0.08 tweaks
 
-  cout<<"_cte_prior before twiddle"<<pid._cte_prior<<endl;
-
-  Twiddle twid;
-  vector<double> dK_initial = {1.0,1.0,1.0};
-  twid.init(pid, dK_initial, 0.1, 100);
-
-  cout<<"_cte_prior after twiddle"<<pid._cte_prior<<endl;
-
-  return 0;
+  Trainer trainer;
+  vector<double> dK_initial = {1,0.001,1};
+  // vector<double> dK_initial = {0.5,1,1};
+  double threshold = 0.1;
+  int max_timesteps = 300;
+  trainer.init(pid, dK_initial, threshold, max_timesteps);
 
   // TODO: modify speed based upon steering angle, e.g. targetSpeed = 30.*(1.-abs(steerAngle)) + 20
 
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&pid, &trainer](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -77,12 +76,13 @@ int main()
           */
 
           if(is_training){
-            if(!pid.twiddle_completed) {
-              pid.Twiddle(ws);
-            }
-            else {
-              return 0;
-            }
+            // if(!pid.twiddle_completed) {
+            //   pid.Twiddle(ws);
+            // }
+            // else {
+            //   return 0;
+            // }
+            trainer.run(ws);
           }
 
           pid.UpdateError(cte);
@@ -125,8 +125,7 @@ int main()
   });
 
   h.onConnection([&h](uWS::WebSocket<uWS::SERVER> ws, uWS::HttpRequest req) {
-    std::cout << "Connected!!!" << std::endl;
-    std::cout << std::endl;
+    //std::cout << "Connected!!!" << std::endl;
   });
 
   h.onDisconnection([&h](uWS::WebSocket<uWS::SERVER> ws, int code, char *message, size_t length) {

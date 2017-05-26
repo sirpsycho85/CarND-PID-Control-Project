@@ -2,6 +2,7 @@
 #define PID_H
 #include <uWS/uWS.h>
 #include <vector>
+#include <cmath>
 
 using namespace std;
 
@@ -13,6 +14,7 @@ public:
   double _p_error;
   double _i_error;
   double _d_error;
+  double _abs_error;
 
   enum twiddle_step {UP, DOWN, RESET};
   vector<double> coefficients;

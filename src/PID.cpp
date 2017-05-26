@@ -32,6 +32,8 @@ General flow
 TODO: create a P-only controller first
 */
 
+// TODO: am I correctly calculating integral error?
+// TODO: should error used for twiddle not be integral, but be the acrued absolute value of error?
 // TODO: twiddle should be separate class
 // TODO: training wrapper around twiddle that restarts the simulator
 // TODO: members should have TRAILING underscore
@@ -44,10 +46,11 @@ void PID::Init(double Kp, double Ki, double Kd) {
   _cte_prior = 0;
   _d_error = 0;
   _i_error = 0;
+  _abs_error = 0;
 
-  coefficients.push_back(0);
-  coefficients.push_back(0);
-  coefficients.push_back(0);
+  coefficients.push_back(Kp);
+  coefficients.push_back(Ki);
+  coefficients.push_back(Kd);
 
   twiddle_variables.push_back(1);
   twiddle_variables.push_back(1);
@@ -68,6 +71,7 @@ void PID::UpdateError(double cte) {
   _i_error += cte;
   _d_error = (_cte_prior-cte);
   _cte_prior = cte;
+  _abs_error += fabs(cte);
 }
 
 double PID::TotalError() {
