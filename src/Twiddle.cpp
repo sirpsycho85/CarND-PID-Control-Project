@@ -12,6 +12,7 @@ Twiddle::~Twiddle() {}
 
 
 void Twiddle::init(PID &pid, vector<double> dK, double threshold, double initial_error) {
+  
   _pid = &pid;
 
   _size = (*_pid).coefficients.size();
@@ -28,7 +29,8 @@ void Twiddle::init(PID &pid, vector<double> dK, double threshold, double initial
 
   _is_init = true;
 
-  cout << "initial error = " << _best_error << endl;
+  cout << "best error = " << _best_error << endl;
+  cout << "coefficients = " << (*_pid).coefficients[0] << "\t" << (*_pid).coefficients[1] << "\t" << (*_pid).coefficients[2] << endl;
 }
 
 

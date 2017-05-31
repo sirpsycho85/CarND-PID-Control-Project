@@ -11,9 +11,6 @@
 using namespace std;
 using json = nlohmann::json;
 
-// config
-  bool is_training = false;
-
 // For converting back and forth between radians and degrees.
 constexpr double pi() { return M_PI; }
 double deg2rad(double x) { return x * pi() / 180; }
@@ -40,19 +37,21 @@ int main()
   uWS::Hub h;
 
   PID pid;
-  pid.Init(3.641,-0.00115523,3.27761);
+  pid.Init(0.1,0.0,0.6);
   //3.641 -0.00115523 3.27761 with 0.05 0.00005 0.08 tweaks
+  //coefficients = 0.11  -0.0001 0.0001 wiht .06 .0006 .005
+
+  bool is_training = false;
 
   Trainer trainer;
-  vector<double> dK_initial = {1,0.001,1};
-  // vector<double> dK_initial = {0.5,1,1};
-  double threshold = 0.1;
-  int max_timesteps = 300;
+  vector<double> dK_initial = {0.1,0.0,0.4};
+  double threshold = 0.001;
+  int max_timesteps = 1000;
   trainer.init(pid, dK_initial, threshold, max_timesteps);
 
   // TODO: modify speed based upon steering angle, e.g. targetSpeed = 30.*(1.-abs(steerAngle)) + 20
 
-  h.onMessage([&pid, &trainer](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&pid, &trainer, &is_training](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -76,12 +75,6 @@ int main()
           */
 
           if(is_training){
-            // if(!pid.twiddle_completed) {
-            //   pid.Twiddle(ws);
-            // }
-            // else {
-            //   return 0;
-            // }
             trainer.run(ws);
           }
 
@@ -92,11 +85,11 @@ int main()
                         -1 * pid.coefficients[2] * pid._d_error;
           
           // DEBUG
-          //std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
+          // std::cout << "cte prior: " << pid._cte_prior << " CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.3;
+          msgJson["throttle"] = 0.2;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);

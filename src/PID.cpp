@@ -60,7 +60,7 @@ void PID::Init(double Kp, double Ki, double Kd) {
   is_twiddle_initialized = false;
   best_error = 0;
   time_step = 0;
-  max_time_steps = 200;
+  max_time_steps = 2000;
   twiddle_threshold = 1;
   twiddle_completed = false;
   step = UP;
