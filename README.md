@@ -3,6 +3,23 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
+## Student Reflection
+
+Generally per my reading, I understood the proportional component to create a more sensitive controller, the derivative component to reduce overshoot, and the intergral component to reduce steady state errors that occur in PD control.
+
+Based on this understanding, I manually tune the controller's Kp, Ki, and Kd constants.
+
+1. First I made Kp high enough to where the controller seemed responsive enough to make the turns.
+2. Then raised Kd until it stopped overshooting and approached the set point in a more controlled way.
+3. At this point I was getting around the track, but for some of the tougher turns, my controller wasn’t responsive enough, so I raised Kp some more.
+4. I left Ki = 0. I think  because the car already starts pretty close to the set point, a small steady state error is negligible in the final performance, and therefore an integral factor was not critical.
+
+The final values were Kp, Ki, Kd = 0.2, 0.0, 3.0
+
+(Note: I had attempted several automated twiddle approaches using different ideas for error. I am running into some threading issues with too many websockets messages coming in and causing me to run twiddle multiple times, so I decided to save that for a future improvement. I then switched to the manual tuning approach described above, based on my understanding of how each of the three components contribute to the controller.)
+
+---
+
 ## Dependencies
 
 * cmake >= 3.5
