@@ -36,22 +36,25 @@ int main()
 {
   uWS::Hub h;
 
-  PID pid;
-  pid.Init(0.1,0.0,0.6);
-  //3.641 -0.00115523 3.27761 with 0.05 0.00005 0.08 tweaks
-  //coefficients = 0.11  -0.0001 0.0001 wiht .06 .0006 .005
-
   bool is_training = false;
+  double throttle = 0.3;
+
+  PID pid;
+  pid.Init(0.2,0.0,3.0);
+  
+  if(is_training) {
+    cout << "training\n";
+  }
 
   Trainer trainer;
-  vector<double> dK_initial = {0.1,0.0,0.4};
+  vector<double> dK_initial = {0.02,0.0,0.012};
   double threshold = 0.001;
   int max_timesteps = 1000;
   trainer.init(pid, dK_initial, threshold, max_timesteps);
 
   // TODO: modify speed based upon steering angle, e.g. targetSpeed = 30.*(1.-abs(steerAngle)) + 20
 
-  h.onMessage([&pid, &trainer, &is_training](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&pid, &trainer, &is_training, &throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -89,7 +92,7 @@ int main()
 
           json msgJson;
           msgJson["steering_angle"] = steer_value;
-          msgJson["throttle"] = 0.2;
+          msgJson["throttle"] = throttle;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
           //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);

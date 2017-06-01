@@ -35,9 +35,9 @@ private:
 	int _max_timesteps;
 	double _threshold;
 	int _timestep;
-	bool _is_init;
 	double _error;
-	bool _is_ready;
+	int _best_timestep;
+	bool _lock;
 
 	void restart(uWS::WebSocket<uWS::SERVER> ws);
 };
